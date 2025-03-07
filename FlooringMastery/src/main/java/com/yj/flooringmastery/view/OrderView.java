@@ -27,7 +27,7 @@ public class OrderView {
         io.print("5. Quit");
 
         return io.readInt("Please select from the"
-                + " above choices.", 1, 5);
+                + " above choices.", 1, 6);
     }
 
     public void displayExitBanner() {

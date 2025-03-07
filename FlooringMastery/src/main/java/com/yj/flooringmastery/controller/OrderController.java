@@ -50,6 +50,9 @@ public class OrderController {
                     case 5:
                         keepGoing = false;
                         break;
+                    case 6:
+                        exportData();
+                        break;
                     default:
                         unknownCommand();
                 }
@@ -282,6 +285,10 @@ public class OrderController {
             service.removeOrder(orderNum, date);
             view.displayOrderRemoveSuccess();
         }
+    }
+
+    private void exportData() {
+        service.exportData();
     }
 
     private void unknownCommand() {
