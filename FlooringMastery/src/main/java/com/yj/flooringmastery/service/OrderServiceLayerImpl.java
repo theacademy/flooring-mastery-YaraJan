@@ -11,7 +11,13 @@ import com.yj.flooringmastery.model.Tax;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -22,19 +28,22 @@ public class OrderServiceLayerImpl implements OrderServiceLayer{
     private TaxDAO taxDao;
     private ProductDAO productDao;
     private final String ORDER_NUMBER_FILE;
+    private final String DATA_EXPORT_FILE;
 
     public OrderServiceLayerImpl(OrderDAO orderDao, TaxDAO taxDao, ProductDAO productDao) {
         this.orderDao = orderDao;
         this.taxDao = taxDao;
         this.productDao = productDao;
         this.ORDER_NUMBER_FILE = "OrderNumber.txt";
+        this.DATA_EXPORT_FILE = "..\\Backup\\DataExport.txt";
     }
 
-    public OrderServiceLayerImpl(OrderDAO orderDao, TaxDAO taxDao, ProductDAO productDao, String orderNumFile) {
+    public OrderServiceLayerImpl(OrderDAO orderDao, TaxDAO taxDao, ProductDAO productDao, String orderNumFile, String dataExportFile) {
         this.orderDao = orderDao;
         this.taxDao = taxDao;
         this.productDao = productDao;
         this.ORDER_NUMBER_FILE = orderNumFile;
+        this.DATA_EXPORT_FILE = dataExportFile;
     }
 
     @Override
@@ -114,6 +123,68 @@ public class OrderServiceLayerImpl implements OrderServiceLayer{
     @Override
     public List<Tax> getAllTaxes() throws PersistenceException {
         return taxDao.getAllTaxes();
+    }
+
+    public void exportData() {
+        List<String> orderFileNames = new ArrayList<>();
+
+        try(DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get("."), "Orders_*.txt")) {
+            for (Path file : stream) {
+                orderFileNames.add(file.getFileName().toString());
+            }
+        } catch (IOException e) {
+            throw new PersistenceException("Could not export data.");
+        }
+
+        List<String> orderEntries = loadExportData(orderFileNames);
+
+        writeExportFile(orderEntries);
+    }
+
+    private void writeExportFile(List<String> orderEntries) {
+        PrintWriter out;
+
+        try {
+            out = new PrintWriter(new FileWriter(DATA_EXPORT_FILE));
+        } catch (IOException e) {
+            throw new PersistenceException("Could not export data.");
+        }
+
+        out.println("OrderNumber,CustomerName,State,TaxRate,ProductType,Area,CostPerSquareFoot,LaborCostPerSquareFoot,MaterialCost,LaborCost,Tax,Total,OrderDate");
+
+        for(String line : orderEntries) {
+            out.println(line);
+            out.flush();
+        }
+
+        out.close();
+    }
+
+    private List<String> loadExportData(List<String> fileNames) {
+        Scanner scanner;
+        List<String> dataEntries = new ArrayList<>();
+
+        for(String fileName : fileNames) {
+            try {
+                scanner = new Scanner(new BufferedReader(new FileReader(fileName)));
+            } catch (FileNotFoundException e) {
+                throw new PersistenceException("Could not export data.");
+            }
+            String currentLine;
+
+            while(scanner.hasNextLine()) {
+                currentLine = scanner.nextLine();
+                if(!currentLine.substring(0, 1).equals("O")) {
+                    String dateString = fileName.substring(7, 15);
+                    LocalDate date = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("MMddyyyy"));
+                    dateString = date.format(DateTimeFormatter.ofPattern("MM-dd-yyyy"));
+                    dataEntries.add(currentLine + dateString);
+                }
+            }
+            scanner.close();
+        }
+
+        return dataEntries;
     }
 
     @Override

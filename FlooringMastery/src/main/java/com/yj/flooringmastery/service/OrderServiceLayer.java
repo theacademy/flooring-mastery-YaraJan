@@ -151,4 +151,11 @@ public interface OrderServiceLayer {
      * @throws PersistenceException throws error if order number file cannot be read from or written to
      */
     void addToOrderNumber() throws PersistenceException;
+
+    /**
+     * exports all the order files to a backup folder outside the project folder
+     * saves them in a folder called backup
+     * @throws PersistenceException throws exception if cannot write or load this export file
+     */
+    void exportData() throws PersistenceException;
 }

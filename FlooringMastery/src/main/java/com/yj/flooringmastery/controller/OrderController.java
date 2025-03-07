@@ -48,10 +48,10 @@ public class OrderController {
                         removeOrder();
                         break;
                     case 5:
-                        keepGoing = false;
+                        exportData();
                         break;
                     case 6:
-                        exportData();
+                        keepGoing = false;
                         break;
                     default:
                         unknownCommand();
@@ -289,6 +289,7 @@ public class OrderController {
 
     private void exportData() {
         service.exportData();
+        view.displayExportSuccessBanner();
     }
 
     private void unknownCommand() {

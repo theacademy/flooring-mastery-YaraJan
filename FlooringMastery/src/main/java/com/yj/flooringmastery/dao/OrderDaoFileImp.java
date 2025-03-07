@@ -12,7 +12,7 @@ public class OrderDaoFileImp implements OrderDAO{
 
     private Map<Integer, Order> orders = new HashMap<>();
     private String orderFile;
-    private static final String DELIMITER = ",";
+    private static final String DELIMITER = "::";
 
     public OrderDaoFileImp() {
     }

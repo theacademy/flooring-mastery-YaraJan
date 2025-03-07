@@ -24,7 +24,8 @@ public class OrderView {
         io.print("2. Add an Order");
         io.print("3. Edit an Order");
         io.print("4. Remove an Order");
-        io.print("5. Quit");
+        io.print("5. Export Data");
+        io.print("6. Quit");
 
         return io.readInt("Please select from the"
                 + " above choices.", 1, 6);
@@ -168,5 +169,9 @@ public class OrderView {
 
     public void displayRemoveOrderBanner() {
         io.print("=== Remove Order ===");
+    }
+
+    public void displayExportSuccessBanner() {
+        io.print("=== Export Successful ===");
     }
 }
